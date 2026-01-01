@@ -1,29 +1,44 @@
 syntax = "proto3";
 
-package exchange;
+package engine;
+
+message Order {
+  string id = 1;
+  string market = 2;
+  string wallet = 3;
+  string side = 4; // BUY | SELL
+  uint64 price = 5;
+  uint64 quantity = 6;
+}
+
+message Trade {
+  string market = 1;
+  string buy_order = 2;
+  string sell_order = 3;
+  uint64 price = 4;
+  uint64 quantity = 5;
+  uint64 sequence = 6;
+}
+
+message SubmitOrderRequest {
+  Order order = 1;
+}
+
+message SubmitOrderResponse {
+  repeated Trade trades = 1;
+}
+
+message CancelOrderRequest {
+  string order_id = 1;
+  string market = 2;
+}
+
+message ReplaceOrderRequest {
+  Order order = 1;
+}
 
 service MatchingEngine {
-  rpc SubmitOrder(OrderRequest) returns (OrderResponse);
-  rpc CancelOrder(CancelRequest) returns (CancelResponse);
+  rpc SubmitOrder(SubmitOrderRequest) returns (SubmitOrderResponse);
+  rpc CancelOrder(CancelOrderRequest) returns (SubmitOrderResponse);
+  rpc ReplaceOrder(ReplaceOrderRequest) returns (SubmitOrderResponse);
 }
-
-message OrderRequest {
-  string id = 1;
-  string side = 2;
-  string price = 3;
-  string amount = 4;
-}
-
-message OrderResponse {
-  bool success = 1;
-  string message = 2;
-}
-
-message CancelRequest {
-  string order_id = 1;
-}
-
-message CancelResponse {
-  bool success = 1;
-}
-

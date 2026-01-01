@@ -1,11 +1,8 @@
-// Snapshot persistence
-pub struct SnapshotManager {
-    // Snapshot management
-}
+use serde::{Serialize, Deserialize};
+use crate::engine::market::MarketRegistry;
+use std::fs;
 
-impl SnapshotManager {
-    pub fn new() -> Self {
-        SnapshotManager {}
-    }
+pub fn save(registry: &MarketRegistry) {
+    let data = serde_json::to_string(registry).unwrap();
+    fs::write("snapshot.json", data).unwrap();
 }
-

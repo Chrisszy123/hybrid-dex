@@ -15,6 +15,23 @@ impl MatchingEngine {
             sequence: 0,
         }
     }
+    pub fn cancel(&mut self, order_id: Uuid) {
+        if let Some((price, side)) = self.orderbook.index.remove(&order_id) {
+            let book = if side == Side::Buy {
+                &mut self.orderbook.bids
+            } else {
+                &mut self.orderbook.asks
+            };
+    
+            if let Some(queue) = book.get_mut(&price) {
+                queue.retain(|o| o.id != order_id);
+            }
+        }
+    }
+    pub fn replace(&mut self, order: Order) -> Vec<Trade> {
+        self.cancel(order.id);
+        self.submit(order)
+    }    
 
     pub fn submit(&mut self, mut order: Order) -> Vec<Trade> {
         let mut trades = vec![];

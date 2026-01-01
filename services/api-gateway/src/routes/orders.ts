@@ -12,5 +12,11 @@ export default async function ordersRoutes(fastify: FastifyInstance) {
   fastify.delete('/:id', async (request, reply) => {
     return { message: 'Cancel order' }
   })
+
+  fastify.post("/orders", async (req, reply) => {
+    const trades = await submitOrder(req.body);
+    return { trades };
+  });
 }
+
 
