@@ -1,11 +1,21 @@
-// Market implementation
-pub struct Market {
-    // Market state
+use std::collections::HashMap;
+use crate::engine::matching::MatchingEngine;
+use crate::models::{order::Order, trade::Trade};
+
+pub struct MarketRegistry {
+    markets: HashMap<String, MatchingEngine>,
 }
 
-impl Market {
+impl MarketRegistry {
     pub fn new() -> Self {
-        Market {}
+        Self { markets: HashMap::new() }
+    }
+
+    pub fn submit(&mut self, order: Order) -> Vec<Trade> {
+        let engine = self.markets
+            .entry(order.market.clone())
+            .or_insert_with(|| MatchingEngine::new(&order.market));
+
+        engine.submit(order)
     }
 }
-

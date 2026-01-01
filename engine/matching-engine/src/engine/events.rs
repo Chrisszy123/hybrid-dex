@@ -1,8 +1,8 @@
-// Event types
-#[derive(Debug, Clone)]
+use crate::models::trade::Trade;
+
+#[derive(Debug)]
 pub enum EngineEvent {
-    OrderMatched,
-    OrderPlaced,
+    TradeExecuted(Trade),
+    OrderAdded,
     OrderCancelled,
 }
-

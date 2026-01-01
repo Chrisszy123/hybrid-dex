@@ -1,11 +1,8 @@
-// Risk management implementation
-pub struct RiskManager {
-    // Risk management state
-}
+use crate::models::order::Order;
 
-impl RiskManager {
-    pub fn new() -> Self {
-        RiskManager {}
+pub fn validate(order: &Order) -> Result<(), &'static str> {
+    if order.quantity == 0 {
+        return Err("Invalid quantity");
     }
+    Ok(())
 }
-
