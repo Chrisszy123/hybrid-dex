@@ -217,7 +217,7 @@ MIT
 
 ---
 
-**Built with ❤️  by a Senior Distributed Systems Engineer**
+**Built with ❤️  by a Senior Backend/Systems Engineer**
 
 *This project demonstrates real-world exchange architecture used by platforms like Coinbase, dYdX, and Binance.*
 
