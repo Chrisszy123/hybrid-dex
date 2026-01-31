@@ -2,7 +2,7 @@ use uuid::Uuid;
 use serde::{Serialize, Deserialize};
 use super::price::Price;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Trade {
     pub market: String,
     pub buy_order: Uuid,

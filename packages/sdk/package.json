@@ -8,7 +8,7 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@hybrid-dex/shared-types": "workspace:*"
+    "@hybrid-dex/shared-types": "*"
   },
   "devDependencies": {
     "typescript": "^5.2.0"

@@ -33,12 +33,20 @@ message CancelOrderRequest {
   string market = 2;
 }
 
+message CancelOrderResponse {
+  bool success = 1;
+}
+
 message ReplaceOrderRequest {
   Order order = 1;
 }
 
+message ReplaceOrderResponse {
+  repeated Trade trades = 1;
+}
+
 service MatchingEngine {
   rpc SubmitOrder(SubmitOrderRequest) returns (SubmitOrderResponse);
-  rpc CancelOrder(CancelOrderRequest) returns (SubmitOrderResponse);
-  rpc ReplaceOrder(ReplaceOrderRequest) returns (SubmitOrderResponse);
+  rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse);
+  rpc ReplaceOrder(ReplaceOrderRequest) returns (ReplaceOrderResponse);
 }

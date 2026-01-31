@@ -1,6 +1,9 @@
 use crate::engine::orderbook::OrderBook;
 use crate::models::{order::Order, trade::Trade, side::Side, price::Price};
+use uuid::Uuid;
+use serde::{Serialize, Deserialize};
 
+#[derive(Serialize, Deserialize)]
 pub struct MatchingEngine {
     pub market: String,
     pub orderbook: OrderBook,
@@ -39,22 +42,38 @@ impl MatchingEngine {
         match order.side {
             Side::Buy => {
                 while order.quantity > 0 {
-                    let (best_price, asks) = match self.orderbook.best_ask() {
-                        Some(v) => v,
-                        None => break,
+                    // Get best price and check if we can match
+                    let best_price = {
+                        let (price, asks) = match self.orderbook.best_ask() {
+                            Some(v) => v,
+                            None => break,
+                        };
+                        
+                        if order.price < *price {
+                            break;
+                        }
+                        *price
                     };
 
-                    if order.price < *best_price {
-                        break;
-                    }
-
+                    // Now we can safely borrow mutably again
+                    let (_, asks) = self.orderbook.best_ask().unwrap();
                     let mut resting = asks.pop_front().unwrap();
                     let qty = order.quantity.min(resting.quantity);
 
                     order.quantity -= qty;
                     resting.quantity -= qty;
 
-                    trades.push(self.trade(&order, &resting, *best_price, qty));
+                    // Create trade (borrow ended, so we can access self)
+                    self.sequence += 1;
+                    let trade = Trade {
+                        market: self.market.clone(),
+                        buy_order: order.id,
+                        sell_order: resting.id,
+                        price: best_price,
+                        quantity: qty,
+                        sequence: self.sequence,
+                    };
+                    trades.push(trade);
 
                     if resting.quantity > 0 {
                         asks.push_front(resting);
@@ -64,22 +83,38 @@ impl MatchingEngine {
 
             Side::Sell => {
                 while order.quantity > 0 {
-                    let (best_price, bids) = match self.orderbook.best_bid() {
-                        Some(v) => v,
-                        None => break,
+                    // Get best price and check if we can match
+                    let best_price = {
+                        let (price, bids) = match self.orderbook.best_bid() {
+                            Some(v) => v,
+                            None => break,
+                        };
+                        
+                        if order.price > *price {
+                            break;
+                        }
+                        *price
                     };
 
-                    if order.price > *best_price {
-                        break;
-                    }
-
+                    // Now we can safely borrow mutably again
+                    let (_, bids) = self.orderbook.best_bid().unwrap();
                     let mut resting = bids.pop_front().unwrap();
                     let qty = order.quantity.min(resting.quantity);
 
                     order.quantity -= qty;
                     resting.quantity -= qty;
 
-                    trades.push(self.trade(&resting, &order, *best_price, qty));
+                    // Create trade (borrow ended, so we can access self)
+                    self.sequence += 1;
+                    let trade = Trade {
+                        market: self.market.clone(),
+                        buy_order: resting.id,
+                        sell_order: order.id,
+                        price: best_price,
+                        quantity: qty,
+                        sequence: self.sequence,
+                    };
+                    trades.push(trade);
 
                     if resting.quantity > 0 {
                         bids.push_front(resting);
@@ -97,22 +132,4 @@ impl MatchingEngine {
         trades
     }
 
-    fn trade(
-        &mut self,
-        buy: &Order,
-        sell: &Order,
-        price: Price,
-        quantity: u64,
-    ) -> Trade {
-        self.sequence += 1;
-
-        Trade {
-            market: self.market.clone(),
-            buy_order: buy.id,
-            sell_order: sell.id,
-            price,
-            quantity,
-            sequence: self.sequence,
-        }
-    }
 }

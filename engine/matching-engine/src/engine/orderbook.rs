@@ -2,13 +2,15 @@ use std::collections::{BTreeMap, VecDeque};
 use crate::models::{order::Order, side::Side, price::Price};
 use std::collections::HashMap;
 use uuid::Uuid;
+use serde::{Serialize, Deserialize};
 
+#[derive(Serialize, Deserialize)]
 pub struct OrderBook {
     pub bids: BTreeMap<Price, VecDeque<Order>>,
     pub asks: BTreeMap<Price, VecDeque<Order>>,
     pub index: HashMap<Uuid, (Price, Side)>,
 }
-self.index.insert(order.id, (order.price, order.side));
+
 impl OrderBook {
     pub fn new() -> Self {
         Self {
@@ -19,6 +21,8 @@ impl OrderBook {
     }
 
     pub fn add(&mut self, order: Order) {
+        self.index.insert(order.id, (order.price, order.side));
+        
         let book = match order.side {
             Side::Buy => &mut self.bids,
             Side::Sell => &mut self.asks,
